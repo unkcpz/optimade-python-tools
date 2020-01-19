@@ -1,11 +1,6 @@
 name: CI tests
 
-on:
-  pull_request:
-  push:
-    branches:
-    - master
-    - 'push-action/**'
+on: [pull_request, push]
 
 # Cancel running workflows when additional changes are pushed
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-a-fallback-value
