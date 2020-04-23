@@ -125,7 +125,7 @@ jobs:
         path: /
         all versioned paths: yes
         index: yes
-        validator version: ${{ github.sha }}  # This ensures the head of a PR or latest push commit is tested
+        validator version: latest  # Passing sha here, does not work, since it's hardcoded to go to Materials-Consortia/<repo>
 
   pytest:
     runs-on: ubuntu-latest
