@@ -15,5 +15,5 @@
     "source_url": "https://github.com/CasperWA/optimade-python-tools/tree/index_meta_db",
     "maintainer": {"email": "casper.andersen@epfl.ch"}
   },
-  "default_db": "optimade-sample"
+  "default_db": null
 }
