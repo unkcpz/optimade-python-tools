@@ -2,7 +2,7 @@
   "debug": false,
   "page_limit": 15,
   "page_limit_max": 100,
-  "base_url": "https://dev-aiida-dev.materialscloud.org/optimade",
+  "base_url": "https://aiida-dev.materialscloud.org/optimade",
   "provider": {
     "prefix": "mcloud",
     "name": "Materials Cloud",
