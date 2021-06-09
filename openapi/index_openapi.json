@@ -85,7 +85,7 @@
             }
           },
           "553": {
-            "description": "Additional Response",
+            "description": "Version Not Supported",
             "content": {
               "application/json": {
                 "schema": {
@@ -344,7 +344,7 @@
             }
           },
           "553": {
-            "description": "Additional Response",
+            "description": "Version Not Supported",
             "content": {
               "application/json": {
                 "schema": {

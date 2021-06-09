@@ -14,6 +14,7 @@ ERROR_RESPONSES = {
     status_code: {"model": ErrorResponse}
     for status_code in [400, 403, 404, 422, 500, 501, 553]
 }
+ERROR_RESPONSES[553].update({"description": "Version Not Supported"})
 
 
 def retrieve_queryable_properties(
