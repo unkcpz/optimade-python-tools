@@ -1,8 +1,18 @@
-from optimade.models import DataType, StructureResource, ReferenceResource
+from optimade.models import (
+    DataType,
+    ErrorResponse,
+    StructureResource,
+    ReferenceResource,
+)
 
 ENTRY_INFO_SCHEMAS = {
     "structures": StructureResource.schema,
     "references": ReferenceResource.schema,
+}
+
+ERROR_RESPONSES = {
+    status_code: {"model": ErrorResponse}
+    for status_code in [400, 403, 404, 422, 500, 501, 553]
 }
 
 
