@@ -3,6 +3,11 @@
 from enum import Enum
 
 from typing import Optional, Union, List, Dict, Type, Any
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 from datetime import datetime
 
 from pydantic import root_validator, BaseModel, AnyHttpUrl, AnyUrl, EmailStr
@@ -144,11 +149,8 @@ class Warnings(OptimadeError):
 
     """
 
-    type: str = StrictField(
-        "warning",
-        const="warning",
+    type: Literal["warning"] = StrictField(
         description='Warnings must be of type "warning"',
-        pattern="^warning$",
     )
 
     @root_validator(pre=True)

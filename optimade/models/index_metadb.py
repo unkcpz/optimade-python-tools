@@ -4,6 +4,11 @@ from enum import Enum
 from pydantic import Field, BaseModel  # pylint: disable=no-name-in-module
 from typing import Union, Dict
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from optimade.models.jsonapi import BaseResource
 from optimade.models.baseinfo import BaseInfoAttributes, BaseInfoResource
 from optimade.models.utils import StrictField
@@ -26,9 +31,8 @@ class DefaultRelationship(Enum):
 class IndexInfoAttributes(BaseInfoAttributes):
     """Attributes for Base URL Info endpoint for an Index Meta-Database"""
 
-    is_index: bool = StrictField(
+    is_index: Literal[True] = StrictField(
         True,
-        const=True,
         description="This must be `true` since this is an index meta-database (see section Index Meta-Database).",
     )
 
@@ -36,7 +40,7 @@ class IndexInfoAttributes(BaseInfoAttributes):
 class RelatedLinksResource(BaseResource):
     """A related Links resource object"""
 
-    type: str = Field("links", const="links", regex="^links$")
+    type: Literal["links"] = Field(...)
 
 
 class IndexRelationship(BaseModel):

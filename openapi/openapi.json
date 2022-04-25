@@ -1477,12 +1477,16 @@
         "properties": {
           "id": {
             "title": "Id",
-            "pattern": "^/$",
+            "enum": [
+              "/"
+            ],
             "type": "string"
           },
           "type": {
             "title": "Type",
-            "pattern": "^info$",
+            "enum": [
+              "info"
+            ],
             "type": "string"
           },
           "links": {
@@ -2220,7 +2224,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^links$",
+            "enum": [
+              "links"
+            ],
             "type": "string",
             "description": "These objects are described in detail in the section Links Endpoint"
           },
@@ -2627,7 +2633,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^references$",
+            "enum": [
+              "references"
+            ],
             "type": "string",
             "description": "The name of the type of an entry.\n- **Type**: string.\n- **Requirements/Conventions**:\n    - **Support**: MUST be supported by all implementations, MUST NOT be `null`.\n    - **Query**: MUST be a queryable property with support for all mandatory filter features.\n    - **Response**: REQUIRED in the response.\n    - MUST be an existing entry type.\n    - The entry of type <type> and ID <id> MUST be returned in response to a request for `/<type>/<id>` under the versioned base URL.\n- **Example**: `\"structures\"`"
           },
@@ -3352,7 +3360,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^structures$",
+            "enum": [
+              "structures"
+            ],
             "type": "string",
             "description": "The name of the type of an entry.\n\n- **Type**: string.\n\n- **Requirements/Conventions**:\n    - **Support**: MUST be supported by all implementations, MUST NOT be `null`.\n    - **Query**: MUST be a queryable property with support for all mandatory filter features.\n    - **Response**: REQUIRED in the response.\n    - MUST be an existing entry type.\n    - The entry of type `<type>` and ID `<id>` MUST be returned in response to a request for `/<type>/<id>` under the versioned base URL.\n\n- **Examples**:\n    - `\"structures\"`"
           },
@@ -3823,7 +3833,6 @@
       "Warnings": {
         "title": "Warnings",
         "required": [
-          "detail",
           "type"
         ],
         "type": "object",
@@ -3877,7 +3886,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^warning$",
+            "enum": [
+              "warning"
+            ],
             "type": "string",
             "description": "Warnings must be of type \"warning\""
           }

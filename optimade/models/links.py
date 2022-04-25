@@ -7,6 +7,11 @@ from pydantic import (  # pylint: disable=no-name-in-module
 )
 from typing import Union, Optional
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from optimade.models.jsonapi import Link, Attributes
 from optimade.models.entries import EntryResource
 from optimade.models.utils import StrictField
@@ -89,11 +94,9 @@ It SHOULD NOT be present if `aggregate`=`ok`.""",
 class LinksResource(EntryResource):
     """A Links endpoint resource object"""
 
-    type: str = StrictField(
-        "links",
-        const="links",
+    type: Literal["links"] = StrictField(
+        ...,
         description="These objects are described in detail in the section Links Endpoint",
-        pattern="^links$",
     )
 
     attributes: LinksResourceAttributes = StrictField(

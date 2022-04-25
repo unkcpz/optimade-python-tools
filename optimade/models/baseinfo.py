@@ -2,6 +2,12 @@
 import re
 
 from typing import Dict, List, Optional
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from pydantic import BaseModel, AnyHttpUrl, Field, validator, root_validator
 
 from optimade.models.jsonapi import Resource
@@ -100,6 +106,6 @@ Examples: `1.0.0`, `1.0.0-rc.2`.""",
 
 
 class BaseInfoResource(Resource):
-    id: str = Field("/", const="/", pattern="^/$")
-    type: str = Field("info", const="info", pattern="^info$")
+    id: Literal["/"] = Field(...)
+    type: Literal["info"] = Field(...)
     attributes: BaseInfoAttributes = Field(...)

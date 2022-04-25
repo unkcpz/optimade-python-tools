@@ -885,8 +885,12 @@
           },
           "is_index": {
             "title": "Is Index",
+            "enum": [
+              true
+            ],
             "type": "boolean",
-            "description": "This must be `true` since this is an index meta-database (see section Index Meta-Database)."
+            "description": "This must be `true` since this is an index meta-database (see section Index Meta-Database).",
+            "default": true
           }
         },
         "description": "Attributes for Base URL Info endpoint for an Index Meta-Database"
@@ -903,12 +907,16 @@
         "properties": {
           "id": {
             "title": "Id",
-            "pattern": "^/$",
+            "enum": [
+              "/"
+            ],
             "type": "string"
           },
           "type": {
             "title": "Type",
-            "pattern": "^info$",
+            "enum": [
+              "info"
+            ],
             "type": "string"
           },
           "links": {
@@ -1102,7 +1110,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^links$",
+            "enum": [
+              "links"
+            ],
             "type": "string",
             "description": "These objects are described in detail in the section Links Endpoint"
           },
@@ -1474,7 +1484,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^links$",
+            "enum": [
+              "links"
+            ],
             "type": "string"
           }
         },
@@ -1859,7 +1871,6 @@
       "Warnings": {
         "title": "Warnings",
         "required": [
-          "detail",
           "type"
         ],
         "type": "object",
@@ -1913,7 +1924,9 @@
           },
           "type": {
             "title": "Type",
-            "pattern": "^warning$",
+            "enum": [
+              "warning"
+            ],
             "type": "string",
             "description": "Warnings must be of type \"warning\""
           }

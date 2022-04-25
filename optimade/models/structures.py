@@ -7,6 +7,11 @@ from functools import reduce
 from enum import IntEnum, Enum
 from typing import List, Optional, Union
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from pydantic import BaseModel, validator, root_validator, conlist
 
 from optimade.models.entries import EntryResourceAttributes, EntryResource
@@ -1104,9 +1109,8 @@ The properties of the species are found in the property `species`.
 class StructureResource(EntryResource):
     """Representing a structure."""
 
-    type: str = StrictField(
-        "structures",
-        const="structures",
+    type: Literal["structures"] = StrictField(
+        ...,
         description="""The name of the type of an entry.
 
 - **Type**: string.
@@ -1120,7 +1124,6 @@ class StructureResource(EntryResource):
 
 - **Examples**:
     - `"structures"`""",
-        pattern="^structures$",
         support=SupportLevel.MUST,
         queryable=SupportLevel.MUST,
     )

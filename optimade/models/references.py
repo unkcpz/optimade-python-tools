@@ -6,6 +6,11 @@ from pydantic import (  # pylint: disable=no-name-in-module
 )
 from typing import List, Optional
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from optimade.models.entries import EntryResource, EntryResourceAttributes
 from optimade.models.utils import OptimadeField, SupportLevel
 
@@ -248,9 +253,8 @@ class ReferenceResource(EntryResource):
 
     """
 
-    type: str = OptimadeField(
-        "references",
-        const="references",
+    type: Literal["references"] = OptimadeField(
+        ...,
         description="""The name of the type of an entry.
 - **Type**: string.
 - **Requirements/Conventions**:
@@ -260,7 +264,6 @@ class ReferenceResource(EntryResource):
     - MUST be an existing entry type.
     - The entry of type <type> and ID <id> MUST be returned in response to a request for `/<type>/<id>` under the versioned base URL.
 - **Example**: `"structures"`""",
-        pattern="^references$",
         support=SupportLevel.MUST,
         queryable=SupportLevel.MUST,
     )
