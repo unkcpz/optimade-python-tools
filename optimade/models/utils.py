@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Optional
 
 from pydantic import Field
+from pydantic.fields import FieldInfo
 
 _PYDANTIC_FIELD_KWARGS = list(inspect.signature(Field).parameters.keys())
 
@@ -26,11 +27,37 @@ class SupportLevel(Enum):
     OPTIONAL = "optional"
 
 
+class StrictFieldInfo(FieldInfo):
+    """Wraps the standard pydantic `FieldInfo` in order
+    to prefix any custom keys from `StrictField`.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        bad_keys = ("support", "queryable", "unit")
+        for key in bad_keys:
+            if key in self.extra:
+                self.extra[f"x-optimade-{key}"] = self.extra.pop(key)
+
+
+def StrictPydanticField(*args, **kwargs):
+    """Wrapper for `Field` that uses `StrictFieldInfo` instead of
+    the pydantic `FieldInfo`.
+    """
+    print(args, kwargs)
+    if "nullable" in kwargs:
+        breakpoint()
+    field_info = StrictFieldInfo(*args, **kwargs)
+    field_info._validate()
+    return field_info
+
+
 def StrictField(
     *args,
     description: str = None,
     **kwargs,
-) -> Field:
+) -> StrictFieldInfo:
     """A wrapper around `pydantic.Field` that does the following:
 
     - Forbids any "extra" keys that would be passed to `pydantic.Field`,
@@ -60,6 +87,7 @@ def StrictField(
         "pattern",
         "uniqueItems",
         "support",
+        "nullable",
         "queryable",
         "sortable",
     ]
@@ -78,7 +106,7 @@ def StrictField(
             f"No description provided for StrictField specified by {args}, {kwargs}."
         )
 
-    return Field(*args, **kwargs)
+    return StrictPydanticField(*args, **kwargs)
 
 
 def OptimadeField(
