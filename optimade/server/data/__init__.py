@@ -1,5 +1,6 @@
 """ Test Data to be used with the OPTIMADE server """
 import bson.json_util
+from typing import Dict, Any
 from pathlib import Path
 
 
@@ -10,6 +11,10 @@ data_paths = {
     "providers": "providers.json",
 }
 
+structures: Dict[str, Any]
+references: Dict[str, Any]
+providers: Dict[str, Any]
+links: Dict[str, Any]
 
 for var, path in data_paths.items():
     try:

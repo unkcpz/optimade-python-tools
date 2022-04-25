@@ -81,7 +81,15 @@ if CONFIG.insert_test_data and CONFIG.index_links_path.exists():
         LOGGER.debug(
             "Adding Materials-Consortia providers to links from optimade.org..."
         )
-        providers = get_providers(add_mongo_id=True)
+        try:
+            providers = get_providers(
+                add_mongo_id=True, source="https://providers.optimade.org"
+            )
+        except RuntimeError as exc:
+            LOGGER.warning(
+                str(exc) + " The `/links` endpoint will not contain any providers"
+            )
+            providers = []
         for doc in providers:
             links_coll.collection.replace_one(
                 filter={"_id": ObjectId(doc["_id"]["$oid"])},

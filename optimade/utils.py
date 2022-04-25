@@ -3,9 +3,18 @@ with OPTIMADE providers that can be used in server or client code.
 
 """
 
-from typing import List
+from typing import List, Union, Optional, Dict, Any
+from pathlib import Path
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+from pydantic import AnyHttpUrl
 
 from optimade.models.links import LinksResource
+from optimade.models.responses import LinksResponse
 
 PROVIDER_LIST_URLS = (
     "https://providers.optimade.org/v1/links",
@@ -26,8 +35,11 @@ def mongo_id_for_database(database_id: str, database_type: str) -> str:
     return str(ObjectId(oid.encode("UTF-8")))
 
 
-def get_providers(add_mongo_id: bool = False) -> list:
-    """Retrieve Materials-Consortia providers (from https://providers.optimade.org/v1/links).
+def get_providers(
+    add_mongo_id: bool = False, source: Optional[Union[AnyHttpUrl, Path]] = None
+) -> list:
+    """Retrieve Materials-Consortia providers (from https://providers.optimade.org/v1/links),
+    unless an alternative source is requested.
 
     Fallback order if providers.optimade.org is not available:
 
@@ -37,7 +49,8 @@ def get_providers(add_mongo_id: bool = False) -> list:
        `/links`-endpoint.
 
     Arguments:
-        Whether to populate the `_id` field of the provider with MongoDB ObjectID.
+        add_mongo_id: Whether to populate the `_id` field of the provider with a MongoDB ObjectID.
+        source: A custom source to query, either an HTTP URL or a file path.
 
     Returns:
         List of raw JSON-decoded providers including MongoDB object IDs.
@@ -45,14 +58,22 @@ def get_providers(add_mongo_id: bool = False) -> list:
     """
     import requests
 
-    try:
-        import simplejson as json
-    except ImportError:
-        import json
+    remote_providers = list(PROVIDER_LIST_URLS)
 
-    for provider_list_url in PROVIDER_LIST_URLS:
+    if source is not None:
+        if isinstance(source, Path):
+            with open(source, "r") as f:
+                providers = LinksResponse(**json.load(f))
+
+        else:
+            remote_providers = [source]
+            # Try to add some other URLs so that source can be just e.g., `https://providers.optimade.org`
+            if not source.endswith("/v1/links") or not source.endswith("/links"):
+                remote_providers.extend([f"{source}/v1/links", f"{source}/links"])
+
+    for provider_list_url in remote_providers:
         try:
-            providers = requests.get(provider_list_url).json()
+            providers = LinksResponse(**requests.get(provider_list_url).json())
         except (
             requests.exceptions.ConnectionError,
             requests.exceptions.ConnectTimeout,
@@ -61,46 +82,62 @@ def get_providers(add_mongo_id: bool = False) -> list:
             pass
         else:
             break
-    else:
+
+    if not providers:
+        if source is not None:
+            raise RuntimeError(f"Unable to retrieve providers list from {source}.")
         try:
-            from optimade.server.data import providers
-        except ImportError:
-            from optimade.server.logger import LOGGER
+            # Fallback to pulling from the providers submodule
+            from optimade.server.data import providers as submodule_providers
 
-            LOGGER.warning(
-                """Could not retrieve a list of providers!
+            providers = LinksResponse(**submodule_providers)
+        except ImportError as exc:
+            raise RuntimeError(
+                "Unable to retrieve providers list.\nTried remote resources: {remote_providers}\nand the providers submodule."
+            ) from exc
 
-    Tried the following resources:
+    return _unpack_providers(providers, add_mongo_id=add_mongo_id)
 
-{}
-    The list of providers will not be included in the `/links`-endpoint.
-""".format(
-                    "".join([f"    * {_}\n" for _ in PROVIDER_LIST_URLS])
-                )
-            )
-            return []
+
+def _unpack_providers(
+    providers: LinksResponse, add_mongo_id: bool
+) -> List[Dict[str, Any]]:
+    """Convert a provider links response to a list of providers with
+    attributes 'popped' to the top-level of the dictionary.
+
+    Parameters:
+        providers: The LinksResponse from the provider list.
+        add_mongo_id: Whether to add MongoDB object IDs to the providers.
+
+    """
 
     providers_list = []
-    for provider in providers.get("data", []):
+    for provider in providers.data:
+        if isinstance(provider, LinksResource):
+            _provider = json.loads(provider.json())
+        else:
+            _provider = provider
         # Remove/skip "exmpl"
-        if provider["id"] == "exmpl":
+        if _provider["id"] == "exmpl":
             continue
 
-        provider.update(provider.pop("attributes", {}))
+        _provider.update(_provider.pop("attributes", {}))
 
         # Add MongoDB ObjectId
         if add_mongo_id:
-            provider["_id"] = {
-                "$oid": mongo_id_for_database(provider["id"], provider["type"])
+            _provider["_id"] = {
+                "$oid": mongo_id_for_database(_provider["id"], _provider["type"])
             }
 
-        providers_list.append(provider)
+        providers_list.append(_provider)
 
     return providers_list
 
 
-def get_child_database_links(provider: LinksResource) -> List[LinksResource]:
-    """For a provider, return a list of available child databases.
+def get_child_database_links(
+    provider: Union[LinksResource, Dict[str, Any]]
+) -> List[LinksResource]:
+    """For a provider, retrieve a list of available child databases.
 
     Arguments:
         provider: The links entry for the provider.
@@ -114,22 +151,38 @@ def get_child_database_links(provider: LinksResource) -> List[LinksResource]:
     from optimade.models.responses import LinksResponse
     from optimade.models.links import LinkType
 
-    base_url = provider.pop("base_url")
+    if isinstance(provider, LinksResource):
+        _id = provider.id
+        base_url = str(provider.attributes.base_url)
+    else:
+        _id = provider.pop("id")
+        base_url = provider.pop("base_url")
+
     if base_url is None:
-        raise RuntimeError(f"Provider {provider['id']} provides no base URL.")
+        raise RuntimeError(f"Provider {_id} provides no base URL.")
 
     links_endp = base_url + "/v1/links"
     links = requests.get(links_endp)
 
     if links.status_code != 200:
         raise RuntimeError(
-            f"Invalid response from {links_endp} for provider {provider['id']}: {links.content}."
+            f"Invalid response from {links_endp} for provider {_id}: {links.content!r}."
         )
 
-    links = LinksResponse(**links.json())
-    return [
-        link
-        for link in links.data
-        if link.attributes.link_type == LinkType.child
-        and link.attributes.base_url is not None
-    ]
+    _links = LinksResponse(**links.json())
+
+    # Unpack links that are stored as `LinksResource` objects, or as raw dictionaries
+    try:
+        return [
+            link
+            for link in _links.data
+            if link.attributes.link_type == LinkType.CHILD
+            and link.attributes.base_url is not None
+        ]
+    except AttributeError:
+        return [
+            link
+            for link in _links.data
+            if link.get("attributes", {}).get("link_type", None) == "child"
+            and link.get("attributes", {}).get("base_url") is not None
+        ]
