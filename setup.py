@@ -20,6 +20,7 @@ with open(module_dir.joinpath("optimade/__init__.py")) as version_file:
 elastic_deps = ["elasticsearch-dsl~=6.4,<7.0"]
 mongo_deps = ["pymongo>=3.12.1,<5", "mongomock~=4.0"]
 server_deps = [
+    "fastapi~=0.65.2",
     "uvicorn~=0.17",
     "pyyaml>=5.4,<7",  # Keep at pyyaml 5.4 for aiida-core support
 ] + mongo_deps
@@ -103,7 +104,6 @@ setup(
     python_requires=">=3.7,<3.11",
     install_requires=[
         "lark-parser~=0.12",
-        "fastapi~=0.65.2",
         "pydantic~=1.9",
         "email_validator~=1.2",
         "requests~=2.27",
