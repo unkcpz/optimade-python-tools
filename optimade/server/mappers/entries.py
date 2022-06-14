@@ -110,7 +110,7 @@ class BaseResourceMapper:
         )
 
     @classproperty
-    @lru_cache(1)
+    @lru_cache(maxsize=1)
     def SUPPORTED_PREFIXES(cls) -> Set[str]:
         """A set of prefixes handled by this entry type.
 
@@ -153,7 +153,7 @@ class BaseResourceMapper:
         return retrieve_queryable_properties(cls.ENTRY_RESOURCE_CLASS.schema())
 
     @classproperty
-    @lru_cache(1)
+    @lru_cache(maxsize=1)
     def ENDPOINT(cls) -> str:
         """Returns the expected endpoint for this mapper, corresponding
         to the `type` property of the resource class.
@@ -167,7 +167,7 @@ class BaseResourceMapper:
         )
 
     @classmethod
-    @lru_cache(1)
+    @lru_cache(maxsize=1)
     def all_length_aliases(cls) -> Iterable[Tuple[str, str]]:
         """Returns all of the associated length aliases for this class,
         including those defined by the server config.
@@ -183,7 +183,7 @@ class BaseResourceMapper:
         )
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def length_alias_for(cls, field: str) -> Optional[str]:
         """Returns the length alias for the particular field,
         or `None` if no such alias is found.
@@ -198,7 +198,7 @@ class BaseResourceMapper:
         return dict(cls.all_length_aliases()).get(field, None)
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def get_backend_field(cls, optimade_field: str) -> str:
         """Return the field name configured for the particular
         underlying database for the passed OPTIMADE field name, that would
@@ -233,7 +233,7 @@ class BaseResourceMapper:
         return optimade_field
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def alias_for(cls, field: str) -> str:
         """Return aliased field name.
 
@@ -255,7 +255,7 @@ class BaseResourceMapper:
         return cls.get_backend_field(field)
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def get_optimade_field(cls, backend_field: str) -> str:
         """Return the corresponding OPTIMADE field name for the underlying database field,
         ready to be used to construct the OPTIMADE-compliant JSON response.
@@ -283,7 +283,7 @@ class BaseResourceMapper:
         )
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def alias_of(cls, field: str) -> str:
         """Return de-aliased field name, if it exists,
         otherwise return the input field name.
@@ -306,7 +306,7 @@ class BaseResourceMapper:
         return cls.get_optimade_field(field)
 
     @classmethod
-    @lru_cache
+    @lru_cache(maxsize=128)
     def get_required_fields(cls) -> set:
         """Get REQUIRED response fields.
 
